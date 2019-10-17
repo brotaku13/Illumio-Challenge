@@ -11,16 +11,27 @@
 using std::string;
 using std::vector;
 
-
+/**
+ * Checks if a file exists or not
+ * @param name string: the name of the file to be checked for existance
+ * @return bool: whether the file exists
+ */
 inline bool exists(const std::string& name) {
     return ( access( name.c_str(), F_OK ) != -1 );
 }
 
+//convenience definitions
 string in = "inbound";
 string out = "outbound";
 string tcp = "tcp";
 string udp = "udp";
 
+/**
+ * Grabs the file from the command line arguments
+ * @param argc int: number of command line arguments
+ * @param argv char**: the command line argument list
+ * @return string: the filepath as a string.
+ */
 string getFilename(int argc, char* argv[])
 {  
     if(argc != 2)
@@ -116,8 +127,8 @@ void runTests()
 
 int main(int argc, char *argv[])
 {
-    // string filename = getFilename(argc, argv);
-    // Firewall firewall(filename);
-    runTests();
+    string filename = getFilename(argc, argv);
+    Firewall firewall(filename);
+    // runTests();
     exit(EXIT_SUCCESS);
 }

@@ -28,6 +28,7 @@ RuleTree::RuleTree()
 void RuleTree::insertRule(FirewallRule& rule)
 {
     // std::cout << rule << '\n';
+    
     //let's check to see if this interval already exists
     IPInterval ip(rule.ip_range, rule.port_range);
     std::string key = makekey(rule);

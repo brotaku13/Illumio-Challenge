@@ -2,13 +2,13 @@
 
 First of all, I'd like to say that this was by far the most interesting coding challenge I've received this hiring season. As someone who is immensely interested in the work that Illumio does, I found it enlightening on both the nature of the work involved, as well as the type of company that Illumio is.
 
-## Program Detauls
+## Program Details
 The program is written and compiled against C++ 11 on a linux machine. To compile, navigate to the project directory and use the `make` command.
 ```
 ~$ make
 ```
 
-Which should create the bin directory and place the executable `program` inside. you can then run with 
+Which should create the bin directory and place the executable `program` inside. **You** can then run with 
 
 ```
 ~$ ./bin/program path/to/csv/file.csv
@@ -39,7 +39,7 @@ So I began looking at Interval Trees. Initially developed for computational geom
 ## Design Methodology
 I began programming this assignment in Python. I saw that Illumio utilizes both Python and Java in their stack and wanted my code to be both relavent and telling of my skillset. However, while I know how the internals of an AVL tree work, and the basic concepts, I was hesitant to set out to code one. Surely there had to be a better way. 
 
-This is when I came upon the key insight into my design. I remembered that the `std::set/std::multiset` in the C++ standard library were implemented as red-black trees, another balanced BST. I decided to utilize those extensively, along with custom data types to store as nodes. These data types were based around a simple object, an interval:
+This is when I came upon the key insight into my design. I remembered that the `std::set/std::multiset` in the C++ standard library were implemented as red-black trees; another balanced BST. I decided to utilize those extensively, along with custom data types to store as nodes. These data types were based around a simple object, an interval:
 
 ```c++
 // Represents a range
@@ -74,11 +74,11 @@ Using these ideas, I could efficiently store and search for ip addresses and por
 
 
 ## Testing
-I am well known among my friends for going crazy with tests at times. I once wrote an 800 line testing file which automatically generated and ran test cases for my systems design course. Additionally, I designed and wrote an entire testing framework for same course as a grader the following quarter. I really enjot creating utilities that extensiely stress test programs such as this. 
+I am well known among my friends for going crazy with tests at times. I once wrote an 800 line testing file which automatically generated and ran test cases for my systems design course. Additionally, I designed and wrote an entire testing framework for same course as a grader the following quarter. I really enjoy creating utilities that extensiely stress test programs such as this. 
 
 Unfortunately, I was unable to realize some of the ideas I had. I was only able to implement some basic test cases which tested some key aspects of the program as well as some edge cases. 
 
-If I had additional time, or if I was writing test cases for a production environment, I would have created a python script which automatically generated a large csv rules list (1-2 million rules) as well as the correct output and tested against that, both for efficiency as well as corretness. 
+If I had additional time, or if I was writing test cases for a production environment, I would have created a python script which automatically generated a large csv rules list (1-2 million rules) as well as the correct output and tested against that for both efficiency and correctness. 
 
 As it stands, I did basic unit tests in `main.cpp`, testing some basic test cases and some edge cases. I think the most complex part of the code is the union of overlapping rules, and so I spent some time testing that as well. 
 
@@ -86,13 +86,13 @@ As it stands, I did basic unit tests in `main.cpp`, testing some basic test case
 
 There are several key areas in my code that I see as lacking and which require additional attention. Unfortunately, I was trying to abide by the time as much as possible and was unable to implement some ideas that I had while coding which would make this program more robust. 
 
-### CSV File as Iterator
+### CSVReader as a file Iterator
 When I was designing the CSV file reader, I came to the realization that the file that I was reading in could be huge. So huge in fact that I would not have wanted to read the whole file into memory. 
 
 I came up with the idea of making a CSV reader as an iterator and doing something akin to the C++ version of
 ```py
 for line in file:
-    # process
+    yield line
 ```
 
 However I had never implemented an iterator before and when I researched it I found that I was spending too much time on a part of the project that was not the main focus. Instead I chose to use a basic `getline` call, reading in each field into a vector to be processed. But this could be improved upon and be more maintainable as a custom iterator.
@@ -106,15 +106,16 @@ outbound,tcp,12-28,0.0.0.5-0.0.0.100
 
 These two rules overlap eachother, overwriting sections of the allowed ports. In practice, this could be really complex because each ip/address port range may have associated allowed IP addresses etc, so when we encounter a rule intersection, combining them would be difficult. 
 
-Here, I essentially just took the union of the overlapping rules. One negative in my design is that it requires the port tree and ip tree to be copied and recreated, using up a lot of resources ($(O(klogn)$) where k is the size of the tree) and compute power if the trees are very large. This is unavoidable due to the nature of the Red-Black tree, where the keys are immutable objects. 
+Here, I essentially just took the union of the overlapping rules. One negative in my design is that it requires the port tree and ip tree to be copied and recreated, using up a lot of resources ($O(klogn)$ where k is the size of the tree) and compute power if the trees are very large. This is unavoidable due to the nature of the Red-Black tree, where the keys are immutable objects. 
 
 ### Construction complexity of an AVL tree. 
-Right now, the rules are only added to the data structure once, and then never altered. In theory, this means that I could have used a normal BST and constructed it bottom up in $O(n)$ time. 
+Right now, the rules are only added to the data structure once, and then never altered. This is done one rule at a time, resulting in a total construction complexity of $O(nlogn)$, since I need to insert $n$ rules and each rule takes $O(logn)$ insertion time. In theory, if I had all of the rules that would be used at the beginning, I could have just used a normal BST and constructed it bottom up in $O(n)$ time. 
 
-Two problems exist with this.
+Three problems exist with this.
 
 1. This assumes that rules are not going to be added later and is thus not maintainable or scalable.
 2. This would mean loading the whole CSV file into memory at construction time, which may not be the best option due to memory limitations. 
+3. This requires the rules to be pre-sorted beforehand by IP address and port number, which is not how data usually arrives. If it was not sorted, it would be the same complexity of $O(nlogn)$ 
 
 
 ## Team Placement

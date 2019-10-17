@@ -60,7 +60,6 @@ void Firewall::initializeRuleTree()
     while(line.size() > 0)
     {
         FirewallRule new_rule = initRule(line);
-        // std::cout << "inserting " << line[0] << ' ' << line[1] << ' ' << line[2] << ' ' << line[3] << '\n';
         ruleTree.insertRule(new_rule);
         reader.getNext(line);
     }
